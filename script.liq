@@ -29,28 +29,32 @@ icecast_password = environment.get("ICECAST_SOURCE_PASSWORD")
 def on_track(m)
     if list.length(m) > 0 then
         last_metadata := m
-        download_id = m["jukebox-download-id"]
+        download_id = m["jukebox_download_id"]
+        callback_url = m["jukebox_started_playing_url"]
         title = m["title"]
         artist = m["artist"]
         log("#{logging_prefix} Started playing download id: #{download_id}, #{title}, #{artist}")
-        url = "#{base_download_url}/api/downloads/#{download_id}/started-playing"
+        url = "#{base_download_url}#{callback_url}"
         h = http.post(url)
         if h.status_code != 200 then
-            log.important("#{logging_prefix} Call to started-playing failed")
+            log.important("#{logging_prefix} Call to #{url} failed")
+            log.important("#{logging_prefix} Status code: #{h.status_code}, Message: #{h.status_message}")
         end
     end
 end
 
 
 def on_end(t, m)
-    download_id = m["jukebox-download-id"]
+    download_id = m["jukebox_download_id"]
+    callback_url = m["jukebox_started_playing_url"]
     title = m["title"]
     artist = m["artist"]
     log("#{logging_prefix} Finished playing download id: #{download_id}, #{title}, #{artist}")
-    url = "#{base_download_url}/api/downloads/#{download_id}/finished-playing"
+    url = "#{base_download_url}#{callback_url}"
     h = http.post(url)
     if h.status_code != 200 then
-        log.important("#{logging_prefix} Call to finished-playing failed")
+        log.important("#{logging_prefix} Call to #{url} failed")
+        log.important("#{logging_prefix} Status code: #{h.status_code}, Message: #{h.status_message}")
     end
 end
 
