@@ -13,15 +13,14 @@ enable_replaygain_metadata()
 listeners_count = ref(0)
 last_metadata = ref([])
 min_download_id = ref(0)
+request_queue = request.queue()
+logging_prefix = "********************"
 
 playing_enabled = interactive.bool("playing_enabled", bool_of_string(environment.get("LS_AUTOPLAY")))
 base_download_url = environment.get("BASE_DOWNLOAD_URL")
 icecast_mount = environment.get("ICECAST_MOUNT")
 icecast_password = environment.get("ICECAST_SOURCE_PASSWORD")
 
-request_queue = request.queue()
-last_metadata = ref([])
-logging_prefix = "********************"
 
 ######################################################################################################################
 ### Radio definition
@@ -103,8 +102,8 @@ end
 
 def append_to_queue(request, response)
     try
-        let json.parse ({downloadId} : {downloadId: int}) = request.body()
-        let url = "#{base_download_url}/api/downloads/#{downloadId}"
+        let json.parse ({downloadId, downloadUrl} : {downloadId: int, downloadUrl: string}) = request.body()
+        let url = "#{base_download_url}#{downloadUrl}"
         request_queue.push.uri(url)
         log("#{logging_prefix} Appended #{downloadId} to the request queue")
         response.status_code(200)
@@ -117,8 +116,8 @@ end
 
 def replace_queue(request, response)
     try
-        let json.parse ({downloadId} : {downloadId: int}) = request.body()
-        let url = "#{base_download_url}/api/downloads/#{downloadId}"
+        let json.parse ({downloadId, downloadUrl} : {downloadId: int, downloadUrl: string}) = request.body()
+        let url = "#{base_download_url}#{downloadUrl}"
         request_queue.set_queue([])
         request_queue.push.uri(url)
         log("#{logging_prefix} Set request queue to #{downloadId}")
