@@ -46,7 +46,7 @@ end
 
 def on_end(t, m)
     download_id = m["jukebox_download_id"]
-    callback_url = m["jukebox_started_playing_url"]
+    callback_url = m["jukebox_finished_playing_url"]
     title = m["title"]
     artist = m["artist"]
     log("#{logging_prefix} Finished playing download id: #{download_id}, #{title}, #{artist}")
