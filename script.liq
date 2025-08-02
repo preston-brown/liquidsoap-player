@@ -61,7 +61,7 @@ end
 
 request_queue.on_track(on_track)
 s2 = source.on_end(request_queue, on_end, delay=0.1)
-#s2 = skipper(every=60., s2)
+#s2 = skipper(every=15., s2)
 radio = switch(track_sensitive=false, [(playing_enabled, s2), ({true}, blank())])
 
 
@@ -93,7 +93,7 @@ def convert_metadata_to_json(m)
     album = get_or_default("album", "")
     artist = get_or_default("artist", "")
     title = get_or_default("title", "")
-    download_id = get_or_default("jukebox-download-id", "0")
+    download_id = get_or_default("jukebox_playback_id", "0")
     download_id = int_of_string(download_id)
     j = json()
     j.add("album", album)
