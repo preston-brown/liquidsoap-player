@@ -26,7 +26,7 @@ icecast_password = environment.get("ICECAST_SOURCE_PASSWORD")
 ### Radio definition
 ######################################################################################################################
 
-def on_track(m)
+def track_started_callback(m)
     if list.length(m) > 0 then
         last_metadata := m
         download_id = m["jukebox_download_id"]
@@ -34,35 +34,34 @@ def on_track(m)
         title = m["title"]
         artist = m["artist"]
         log("#{logging_prefix} Started playing download id: #{download_id}, #{title}, #{artist}")
-        url = "#{base_download_url}#{callback_url}"
-        h = http.post(url)
+        full_url = "#{base_download_url}#{callback_url}"
+        h = http.post(full_url)
         if h.status_code != 200 then
-            log.important("#{logging_prefix} Call to #{url} failed")
+            log.important("#{logging_prefix} Call to #{full_url} failed")
             log.important("#{logging_prefix} Status code: #{h.status_code}, Message: #{h.status_message}")
         end
     end
 end
 
 
-def on_end(t, m)
+def track_finished_callback(t, m)
     download_id = m["jukebox_download_id"]
     callback_url = m["jukebox_finished_playing_url"]
     title = m["title"]
     artist = m["artist"]
     log("#{logging_prefix} Finished playing download id: #{download_id}, #{title}, #{artist}")
-    url = "#{base_download_url}#{callback_url}"
-    h = http.post(url)
+    full_url = "#{base_download_url}#{callback_url}"
+    h = http.post(full_url)
     if h.status_code != 200 then
-        log.important("#{logging_prefix} Call to #{url} failed")
+        log.important("#{logging_prefix} Call to #{full_url} failed")
         log.important("#{logging_prefix} Status code: #{h.status_code}, Message: #{h.status_message}")
     end
 end
 
-
-request_queue.on_track(on_track)
-s2 = source.on_end(request_queue, on_end, delay=0.1)
+request_queue.on_track(track_started_callback, synchronous=false)
+request_queue.on_position(track_finished_callback, position = 0.01, remaining = true, synchronous=false)
 #s2 = skipper(every=15., s2)
-radio = switch(track_sensitive=false, [(playing_enabled, s2), ({true}, blank())])
+radio = switch(track_sensitive=false, [(playing_enabled, request_queue), ({true}, blank())])
 
 
 id = %ffmpeg(format="mp3", %audio(codec="libmp3lame", q=7))
