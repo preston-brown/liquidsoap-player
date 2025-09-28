@@ -4,7 +4,7 @@ settings.harbor.bind_addrs := ["0.0.0.0"]
 
 settings.server.timeout.set(100.)
 settings.log.stdout.set(true)
-settings.log.level.set(5)
+settings.log.level.set(3)
 settings.log.file.append.set(false)
 
 server.telnet()
