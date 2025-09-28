@@ -4,11 +4,12 @@ settings.harbor.bind_addrs := ["0.0.0.0"]
 
 settings.server.timeout.set(100.)
 settings.log.stdout.set(true)
-settings.log.level.set(3)
+settings.log.level.set(5)
 settings.log.file.append.set(false)
 
 server.telnet()
-enable_replaygain_metadata()
+enable_lufs_track_gain_metadata()
+settings.lufs.track_gain_target := -23.
 
 listeners_count = ref(0)
 last_metadata = ref([])
@@ -60,8 +61,9 @@ end
 
 request_queue.on_track(track_started_callback, synchronous=false)
 request_queue.on_position(track_finished_callback, position = 0.01, remaining = true, synchronous=false)
+s = normalize_track_gain(request_queue)
 #s2 = skipper(every=15., s2)
-radio = switch(track_sensitive=false, [(playing_enabled, request_queue), ({true}, blank())])
+radio = switch(track_sensitive=false, [(playing_enabled, s), ({true}, blank())])
 
 
 id = %ffmpeg(format="mp3", %audio(codec="libmp3lame", q=7))
